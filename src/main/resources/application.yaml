@@ -1,0 +1,33 @@
+purge:
+  cron:
+    expression: 0 0 5 * * ?
+
+server:
+  servlet:
+    context-path: /api/v1
+
+spring:
+  h2:
+    console.enabled: true
+  datasource:
+    url: jdbc:h2:mem:mydb
+    username: admin
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: lehrveranstaltungen.bewerten@gmail.com
+    password: ltuieqvsubsznlpp
+    #password: cO]/Dz7LM074Qi0"q0Ms4L}j7r,.)Y
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          timeout: 8000

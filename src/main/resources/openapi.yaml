@@ -1,0 +1,527 @@
+openapi: 3.0.3
+info:
+  title: Lehrveranstaltungs-Bewertungs-Platform
+  description: Eine Platform, auf der TH-Nürnberg-Studierende die Lehrveranstaltungen der TH bewerten können.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: URL fürs lokale Testen
+tags:
+  - name: Authentication
+    description: Hier sind alle Endpoints gebündelt, die zur Authentifizierung gehören
+  - name: Assessment
+    description: Hier sind all Endpoints gebündelt, die zur Bewertung gehören
+paths:
+  /login:
+    post:
+      summary: Endpoint, bei dem sich ein User anmelden kann
+      tags:
+        - Authentication
+      requestBody:
+        description: Anmeldedaten bestehend aus einer Email-Adresse und einem Passwort
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description:
+            Wenn die Anmeldedaten passen, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          description:
+            Wenn die angegebene Email-Adresse keine TH-Adresse ist oder die Anmeldedaten falsch sind, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description:
+            Wenn für die angegebene Email-Adresse kein Account existiert, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '423':
+          description:
+            Wenn der zur Email-Adresse zugehörige User noch nicht freigeschalten ist, sollte er diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /register:
+    post:
+      summary: Endpoint, dem sich ein User registrieren kann
+      tags:
+        - Authentication
+      requestBody:
+        description: Anmeldedaten bestehend aus einer Email-Adresse und einem Passwort
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '201':
+          description:
+            Wenn die angegebene Email-Adresse gültig ist und noch kein Account für diese existiert, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description:
+            Wenn die angegebene Email-Adresse keine TH-Adresse ist oder für diese bereits ein Account existiert, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /confirmRegistration:
+    post:
+      summary: Endpoint, bei dem man mit einem Verification-Token, seinen Account freischalten kann
+      tags:
+        - Authentication
+      requestBody:
+        description: Ein Objet mit einem Attribut token für den Verification-Token
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationToken'
+      responses:
+        '200':
+          description:
+            Wenn der angegebene Verification-Token gültig ist, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description:
+            Wenn der angegebene Verification-Token nicht existiert oder bereits abgelaufen ist, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /resendRegistrationCode:
+    post:
+      summary: Endpoint, bei dem ein User den Reset-Code erneut an seine Email-Adresse schicken lassen kann
+      tags:
+        - Authentication
+      requestBody:
+        description: Anmeldedaten bestehend aus einer Email-Adresse und einem Passwort
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description:
+            Wenn der zur Email-Adresse zugehörige User schon einen Reset-Code beantragt hat, sollte er diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description:
+            Wenn die angegebene Email-Adresse keine TH-Adresse ist, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description:
+            Wenn die angegebene Email-Adresse keinem User zugeordnet werden kann oder kein Reset-Code für diesen User vorliegt, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /changePassword:
+    put:
+      summary: Endpoint, bei dem ein angemeldeter User mit seinem alten Passwort un einem Neuen, sein Passwort ändern kann
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        description: Ein Objekt bestehend aus einem alten Passwort und einem neuen Passwort
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Passwords'
+      responses:
+        '200':
+          description:
+            Wenn das angegebene alte Passwort richtig ist, sollte er diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description:
+            Wenn das angegebene alte Passwort falsch ist, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description:
+            Wenn der User nicht gefunden werden kann, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /resetPassword:
+    post:
+      summary: Endpoint, bei dem man mit angegebener Email von einem User, einen Reset-Code für das Passwort beantragen kann
+      tags:
+        - Authentication
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: Die Email des Accounts, dessen Passwort zurückgesetzt werden soll
+          schema:
+            type: string
+          examples:
+            th:
+              value: beispielt@th-nuernberg.de
+              summary: TH-Email-Adresse
+            nicht-th:
+              value: beispiel@gmail.com
+              summary: nicht TH-Email-Adresse
+      responses:
+        '200':
+          description:
+            Wenn der User eine Email-Adresse von einem Nutzer übersendet hat, sollte er diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description:
+            Wenn die Email-Adresse in der Query fehlt, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description:
+            Wenn die in der Query angegebene Email-Adresse keinem User zugeordnet werden kann, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /renewPassword:
+    put:
+      summary: Endpoint, bei dem man mit einem Reset-Code und einem gewählten und wiederholten Passwort sein altes Passwort zurücksetzen kann
+      tags:
+        - Authentication
+      requestBody:
+        description: Ein Objekt bestehend aus einem Reset-Code und einem neuen Passwort
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Passwords'
+      responses:
+        '200':
+          description:
+            Wenn der User einen validen Reset-Code übersendet hat, sollte er diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description:
+            Wenn der Reset-Code invalide ist, sollte der User diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /assessments:
+    post:
+      summary: Endpoint, bei dem ein Dozent eine Bewertung erstellen kann
+      tags:
+        - Assessment
+      requestBody:
+        description: Die Bewertungserstellungsdaten bestehen aus einem Kursnamen, Dozentnamen, und einem Enddatum
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentRequest'
+            examples:
+              valid request:
+                value:
+                  course: Mathe
+                  lecturer: Mustermann
+                  deadline: 2023-12-01
+              invalid date pattern:
+                value:
+                  course: Mathe
+                  lecturer: Mustermann
+                  deadline: 2023-12-1
+      responses:
+        '200':
+          description: Wenn der Benutzer die Rolle PROF hat und die Bewertungserstellungsdaten passen, sollte der Benutzer diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+              examples:
+                ok:
+                  value:
+                    id: 1
+                    course: Mathe
+                    lecturer: Mustermann
+                    deadline: 2023-12-01
+                    creationDate: 23-11-24
+                    semester:
+                      season: Winter
+                      year: 2023
+                    expired: true
+                    reviewCode: KJdof723
+                    closed: false
+        '400':
+          description: Wenn die Benutzereingaben unvollständig oder nicht valide sind, sollte der Benutzer diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalid date pattern:
+                  value:
+                    message: Das angegebene Datenformat ist nicht korrekt
+                invalid input:
+                  value:
+                    message: Die Eingabeinformationen waren nicht valide
+    get:
+      summary: Endpoint, bei dem ein Dozent seine erstellten Bewertungen abrufen kann
+      tags:
+        - Assessment
+      responses:
+        '200':
+          description: Wenn der Benutzer die Rolle PROF hat und als Nutzer existiert, dann sollte er diese Antwort bekommen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assessment'
+              examples:
+                ok:
+                  value:
+                    - id: 1
+                      course: Mathe
+                      lecturer: Mustermann
+                      deadline: 2023-12-01
+                      creationDate: 23-11-24
+                      semester:
+                        season: Winter
+                        year: 2023
+                      expired: true
+                      reviewCode: KJdof723
+                      closed: false
+                    - id: 2
+                      course: Mathe II
+                      lecturer: Mustermann
+                      deadline: 2024-05-18
+                      creationDate: 2024-05-11
+                      semester:
+                        season: Summer
+                        year: 2024
+                      expired: false
+                      reviewCode: OaoeU834
+                      closed: true
+        '500':
+          description: Wenn der angemeldete Dozent nicht als Nutzer existiert, sollte er diese Nachricht bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                user not found:
+                  value:
+                    message: Der angemeldete Benutzer konnte nicht gefunden werden
+    put:
+      summary: Endpoint, bei dem ein Dozent einer seiner Bewertungen schließen kann
+      tags:
+        - Assessment
+      requestBody:
+        description: Die Daten bestehen aus der Id der Bewertung, die geschlossen werden soll
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: number
+                  example: 1
+      responses:
+        '200':
+          description: Wenn die Bewertung erfolgreich geschlossen wurde, sollte der Benutzer diese Nachricht bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                ok:
+                  value:
+                    message: Bewertung wurde geschlossen
+        '404':
+          description: Wenn die zu schließende Bewertung nicht existiert, sollte der Benutzer diese Nachricht bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                user not found:
+                  value:
+                    message: Evaluation existiert nicht mehr
+        '400':
+          description: Wenn die Bewertung nicht älter als 7 Tage ist, dann kann der Dozent die Bewertung nicht schließen und sollte diese Nachricht bekommen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                user not found:
+                  value:
+                    message: Die Evaluation kann noch nicht geschlossen werden
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Credentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          pattern: '^[A-Za-z0-9.]+@th-nuernberg\.de$'
+          example: beispiel@th-nuernberg.de
+        password:
+          type: string
+          example: passwort
+    VerificationToken:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: Beispiel
+    Passwords:
+      type: object
+      required:
+        - oldPassword
+        - newPassword
+      properties:
+        oldPassword:
+          type: string
+          example: neu
+        newPassword:
+          type: string
+          example: alt
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - token
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        username:
+          type: string
+          pattern: '^[A-Za-z0-9.]+@th-nuernberg\.de$'
+          example: beispiel@th-nuernberg.de
+        token:
+          type: string
+          example: Beispiel
+    AssessmentRequest:
+      type: object
+      required:
+        - course
+        - lecturer
+        - deadline
+      properties:
+        course:
+          type: string
+        lecturer:
+          type: string
+        deadline:
+          type: string
+    Assessment:
+      type: object
+      required:
+        - id
+        - course
+        - lecturer
+        - deadline
+        - creationDate
+        - semester
+        - expired
+        - reviewCode
+      properties:
+        id:
+          type: number
+        course:
+          type: string
+        lecturer:
+          type: string
+        deadline:
+          type: string
+        creationDate:
+          type: string
+        semester:
+          type: object
+          required:
+            - season
+            - year
+          properties:
+            season:
+              type: string
+              enum:
+                - Winter
+                - Summer
+            year:
+              type: number
+        expired:
+          type: boolean
+        reviewCode:
+          type: string
+        closed:
+          type: boolean
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Oops
+    Message:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
