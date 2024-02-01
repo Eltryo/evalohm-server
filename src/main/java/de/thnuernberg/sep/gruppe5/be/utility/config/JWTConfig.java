@@ -30,6 +30,7 @@ public class JWTConfig {
   public JwtEncoder jwtEncoder() {
     JWK jwk = new RSAKey.Builder(keys.getPublicKey()).privateKey(keys.getPrivateKey()).build();
     JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
+
     return new NimbusJwtEncoder(jwks);
   }
 
@@ -40,6 +41,7 @@ public class JWTConfig {
     jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
     JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
     jwtConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+
     return jwtConverter;
   }
 }

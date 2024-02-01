@@ -18,8 +18,4 @@ public interface AssessmentRepository extends JpaRepository<AssessmentEntity, Lo
   List<AssessmentEntity> findAllByCreator(String creatorName);
 
   Optional<List<AssessmentEntity>> findAllByDeadlineBeforeAndExpiredFalse(LocalDate date);
-
-  Optional<List<AssessmentEntity>> findAllByCourseAndExpiredFalse(String course);
-
-  Optional<AssessmentEntity> findByReviewCodeAndExpiredFalse(String reviewCode);
 }

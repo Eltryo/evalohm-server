@@ -3,7 +3,7 @@ package de.thnuernberg.sep.gruppe5.be.boundary.controller;
 import de.thnuernberg.sep.gruppe5.be.boundary.dtos.*;
 import de.thnuernberg.sep.gruppe5.be.boundary.mapper.AssessmentDTOMapper;
 import de.thnuernberg.sep.gruppe5.be.boundary.mapper.EvaluationDTOMapper;
-import de.thnuernberg.sep.gruppe5.be.control.models.AssessmentModel;
+import de.thnuernberg.sep.gruppe5.be.control.models.Assessment;
 import de.thnuernberg.sep.gruppe5.be.control.models.Evaluation;
 import de.thnuernberg.sep.gruppe5.be.control.services.AssessmentService;
 import de.thnuernberg.sep.gruppe5.be.control.services.EvaluationService;
@@ -28,15 +28,15 @@ public class AssessmentController {
   @PreAuthorize("hasRole('PROF')")
   @PostMapping
   public AssessmentResponseDTO addAssessment(@Valid @RequestBody AssessmentRequestDTO assessmentRequestDTO) {
-    AssessmentModel assessmentModel = assessmentMapper.toAssessmentModel(assessmentRequestDTO);
-    AssessmentModel result = assessmentService.addAssessment(assessmentModel);
+    Assessment assessmentModel = assessmentMapper.toAssessmentModel(assessmentRequestDTO);
+    Assessment result = assessmentService.addAssessment(assessmentModel);
     return assessmentMapper.toAssessmentDTO(result);
   }
 
   @PreAuthorize("hasRole('PROF')")
   @GetMapping("/myAssessments")
   public List<AssessmentResponseDTO> getCreatedAssessmentsFromLoggedInUser() {
-    List<AssessmentModel> result = assessmentService.getCreatedAssessmentsFromLoggedInUser();
+    List<Assessment> result = assessmentService.getCreatedAssessmentsFromLoggedInUser();
     return result.stream().map(assessmentMapper::toAssessmentDTO).toList();
   }
 
@@ -53,7 +53,7 @@ public class AssessmentController {
 
   @GetMapping
   public List<AssessmentResponseDTO> getAllAssessments() {
-    List<AssessmentModel> result = assessmentService.getAllAssessments();
+    List<Assessment> result = assessmentService.getAllAssessments();
     return result.stream().map(assessmentMapper::toAssessmentDTO).toList();
   }
 

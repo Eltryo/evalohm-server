@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class SemesterModel {
+public class Semester {
   @NotNull
   private Season season;
   private int year;

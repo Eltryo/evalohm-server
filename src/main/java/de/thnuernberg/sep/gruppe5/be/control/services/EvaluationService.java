@@ -44,7 +44,6 @@ public class EvaluationService {
       throw new AppException("Der Reviewcode stimmt nicht!", HttpStatus.BAD_REQUEST);
 
     Optional<List<SubmittedAssessmentEntity>> submittedAssessments = this.submittedAssessmentRepository.findAllByUserId(loggedInUser.getId());
-
     if (submittedAssessments.isPresent()) {
       for (SubmittedAssessmentEntity submittedAssessment : submittedAssessments.get()) {
         if (evaluation.getAssessmentId().longValue() == submittedAssessment.getAssessmentId().longValue()) {
@@ -69,27 +68,23 @@ public class EvaluationService {
       throw new AppException("Die Bewertungsphase für diese Lehrveranstaltung ist noch nicht beendet", HttpStatus.BAD_REQUEST);
 
     List<EvaluationEntity> evaluations = evaluationRepository.findAllByAssessmentId(assessmentId);
+
     return evaluations.stream().map(evaluationMapper::toEvaluation).toList();
   }
 
   public float getGradeForCourse(String courseName) {
     List<AssessmentEntity> assessmentsForCourse = this.assessmentRepository.findAllByCourse(courseName);
-
     if (assessmentsForCourse.isEmpty())
       throw new AppException("Zu diesem Kurs konnten keine Bewertungen gefunden werden", HttpStatus.NOT_FOUND);
 
     List<Float> gradesForAssessments = new ArrayList<>();
-
     for (int i = 0; i < assessmentsForCourse.toArray().length; i++) {
       if (!(assessmentsForCourse.get(i).isClosed() || assessmentsForCourse.get(i).isExpired()))
         break;
 
       List<EvaluationEntity> evaluationsForAssessment = this.evaluationRepository.findAllByAssessmentId(assessmentsForCourse.get(i).getId());
-
       float[] averageValues = calculateAverageValues(evaluationsForAssessment);
-
       float grade = calculateGrade(averageValues);
-
       if (grade != 6) {
         gradesForAssessments.add(grade);
       }
@@ -99,7 +94,6 @@ public class EvaluationService {
 
     int gradesAmount = 0;
     float gradeSum = 0;
-
     for (Float grade : gradesForAssessments) {
       gradeSum += grade;
       gradesAmount++;
@@ -115,10 +109,8 @@ public class EvaluationService {
 
     float score = 0;
     float gradedAspectsAmount = 0;
-
     for (int i = 0; i < averageValues.length; i++) {
       float value = averageValues[i];
-
       if (value == 0) break;
 
       if (i == 4 || i == 6 || i == 7) {
@@ -147,40 +139,47 @@ public class EvaluationService {
 
     int[] sumOfValues = new int[9];
     int[] counter = new int[9];
-
     for (EvaluationEntity evaluation : evaluationsForAssessment) {
       if (evaluation.getVorlesungsRating() != 0) {
         sumOfValues[0] += evaluation.getVorlesungsRating();
         counter[0]++;
       }
+
       if (evaluation.getUebungsRating() != 0) {
         sumOfValues[1] += evaluation.getUebungsRating();
         counter[1]++;
       }
+
       if (evaluation.getUnterlagenRating() != 0) {
         sumOfValues[2] += evaluation.getUnterlagenRating();
         counter[2]++;
       }
+
       if (evaluation.getPruefungsRating() != 0) {
         sumOfValues[3] += evaluation.getPruefungsRating();
         counter[3]++;
       }
+
       if (evaluation.getZeitaufwandRating() != 0) {
         sumOfValues[4] += evaluation.getZeitaufwandRating();
         counter[4]++;
       }
+
       if (evaluation.getInhaltRating() != 0) {
         sumOfValues[5] += evaluation.getInhaltRating();
         counter[5]++;
       }
+
       if (evaluation.getStoffmengeRating() != 0) {
         sumOfValues[6] += evaluation.getStoffmengeRating();
         counter[6]++;
       }
+
       if (evaluation.getNiveauRating() != 0) {
         sumOfValues[7] += evaluation.getNiveauRating();
         counter[7]++;
       }
+
       if (evaluation.getRelevanzRating() != 0) {
         sumOfValues[8] += evaluation.getRelevanzRating();
         counter[8]++;
@@ -188,7 +187,6 @@ public class EvaluationService {
     }
 
     float[] averageValues = new float[9];
-
     averageValues[0] = Math.round(((float) sumOfValues[0] / counter[0]) * 100) / 100.0f;
     averageValues[1] = Math.round(((float) sumOfValues[1] / counter[1]) * 100) / 100.0f;
     averageValues[2] = Math.round(((float) sumOfValues[2] / counter[2]) * 100) / 100.0f;

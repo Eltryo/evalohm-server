@@ -1,7 +1,7 @@
 package de.thnuernberg.sep.gruppe5.be.control.services;
 
 import de.thnuernberg.sep.gruppe5.be.boundary.dtos.ContactRequestDTO;
-import de.thnuernberg.sep.gruppe5.be.control.models.AssessmentMailModel;
+import de.thnuernberg.sep.gruppe5.be.control.models.AssessmentMail;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -65,12 +65,12 @@ public class MailService {
     sendEmail(email);
   }
 
-  public void sendAssessmentResultsReadyMail(@Valid AssessmentMailModel assessment, String recipientAddress) {
+  public void sendAssessmentResultsReadyMail(@Valid AssessmentMail assessment, String recipientAddress) {
     final SimpleMailMessage email = constructAssessmentResultsReadyEmailMessage(assessment, recipientAddress);
     sendEmail(email);
   }
 
-  private SimpleMailMessage constructAssessmentResultsReadyEmailMessage(AssessmentMailModel assessment, String recipientAddress) {
+  private SimpleMailMessage constructAssessmentResultsReadyEmailMessage(AssessmentMail assessment, String recipientAddress) {
     String course = assessment.getCourse();
     String season = assessment.getSemester().getSeason().toString();
     int year = assessment.getSemester().getYear();
@@ -144,10 +144,10 @@ public class MailService {
   private SimpleMailMessage constructEmailMessage(
     String recipientAddress,
     String subject,
-    String message) {
+    String message
+  ) {
     final SimpleMailMessage email = new SimpleMailMessage();
-    //TODO: Dummy-Email-Adresse
-    email.setTo(/*recipientAddress*/"lehrveranstaltungen.bewerten@gmail.com");
+    email.setTo(recipientAddress);
     email.setSubject(subject);
     email.setText(
       messages.getMessage(
@@ -157,6 +157,7 @@ public class MailService {
         Locale.GERMAN
       )
     );
+
     return email;
   }
 }

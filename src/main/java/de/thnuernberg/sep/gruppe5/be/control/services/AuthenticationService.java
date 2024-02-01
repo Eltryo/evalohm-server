@@ -51,21 +51,19 @@ public class AuthenticationService {
 
   private static String getIP() {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
     String ip;
-
     final String xfHeader = request.getHeader("X-Forwarded-For");
     if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
       ip = request.getRemoteAddr();
     } else {
       ip = xfHeader.split(",")[0];
     }
+
     return ip;
   }
 
   public User registerUser(@Valid final Credentials credentials) {
     Optional<UserEntity> oUser = userRepository.findByUsername(credentials.getUsername());
-
     if (oUser.isPresent()) {
       throw new AppException("User existiert bereits!", HttpStatus.BAD_REQUEST);
     }
@@ -77,7 +75,6 @@ public class AuthenticationService {
     user.setEnabled(false);
 
     UserEntity savedUser = userRepository.save(user);
-
     eventPublisher.publishEvent(new OnRegistrationCompleteEvent(entityMapper.toUser(savedUser)));
 
     return entityMapper.toUser(savedUser);
@@ -85,20 +82,16 @@ public class AuthenticationService {
 
   public User loginUser(@Valid final Credentials credentials) {
     UserEntity user = userRepository.findByUsername(credentials.getUsername()).orElseThrow(() -> new AppException("Dieser Nutzer existiert nicht!", HttpStatus.NOT_FOUND));
-
     if (!user.isEnabled()) {
       throw new AppException("Du musst deinen Account noch freischalten!", HttpStatus.LOCKED);
     }
 
     String ip = getIP();
-
     Authentication auth = new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword());
-
     try {
       auth = authenticationManager.authenticate(auth);
     } catch (AuthenticationException e) {
       int remainingAttempts = loginAttemptService.loginFailed(ip);
-
       if (remainingAttempts == 0) {
         throw new AppException("Sie haben leider zu oft ungültige Anmeldedaten ausprobiert, weswegen wir leider weitere Anmeldeversuche von Ihnen sperren müssen!", HttpStatus.BAD_REQUEST);
       } else {
@@ -107,18 +100,16 @@ public class AuthenticationService {
     }
 
     loginAttemptService.loginSuccessful(ip);
-
-    User loggedInUser = entityMapper.toUser(userRepository.findByUsername(credentials.getUsername()).get());
+    User loggedInUser = entityMapper.toUser(user);
     loggedInUser.setToken(jwtTokenService.generateJwt(auth));
+
     return loggedInUser;
   }
 
   public void confirmRegistration(@Valid @NotBlank final String token) {
     VerificationToken verificationToken = verificationService.validateVerificationToken(token);
-
     final UserEntity user = verificationToken.getUser();
     final Calendar cal = Calendar.getInstance();
-
     if ((verificationToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
       userRepository.delete(user);
       throw new AppException("Dieser Code ist leider abgelaufen! Sie müssen die Registrierung erneut durchführen.", HttpStatus.BAD_REQUEST);
@@ -141,7 +132,8 @@ public class AuthenticationService {
   }
 
   public void renewPassword(@Valid final Passwords passwords) {
-    PasswordResetToken token = passwordResetTokenRepository.findByToken(passwords.getOldPassword()).orElseThrow(() -> new AppException("Falscher Reset-Code!", HttpStatus.BAD_REQUEST));
+    PasswordResetToken token = passwordResetTokenRepository.findByToken(passwords.getOldPassword())
+      .orElseThrow(() -> new AppException("Falscher Reset-Code!", HttpStatus.BAD_REQUEST));
 
     UserEntity user = token.getUser();
     user.setPassword(passwordEncoder.encode(passwords.getNewPassword()));
@@ -149,12 +141,11 @@ public class AuthenticationService {
   }
 
   public void resetPassword(@Valid @Pattern(regexp = "[A-Za-z0-9.]+@th-nuernberg\\.de") final String email) {
-    UserEntity user = userRepository.findByUsername(email).orElseThrow(() -> new AppException("User existiert nicht!", HttpStatus.NOT_FOUND));
+    UserEntity user = userRepository.findByUsername(email)
+      .orElseThrow(() -> new AppException("User existiert nicht!", HttpStatus.NOT_FOUND));
 
     final String token = UUID.randomUUID().toString();
-
     createTokenForPasswordReset(entityMapper.toUser(user), token);
-
     mailService.sendPasswordResetMail(user.getUsername(), token);
   }
 
@@ -163,7 +154,8 @@ public class AuthenticationService {
     cal.setTimeInMillis(new Date().getTime());
     cal.add(Calendar.MINUTE, 60 * 24);
 
-    final PasswordResetToken myToken = passwordResetTokenRepository.findByUser(entityMapper.toUserEntity(user)).orElse(new PasswordResetToken());
+    final PasswordResetToken myToken = passwordResetTokenRepository.findByUser(entityMapper.toUserEntity(user))
+      .orElse(new PasswordResetToken());
     myToken.setToken(token);
     myToken.setUser(entityMapper.toUserEntity(user));
     myToken.setExpiryDate(cal.getTime());

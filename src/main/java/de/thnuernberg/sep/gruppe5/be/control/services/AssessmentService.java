@@ -2,10 +2,10 @@ package de.thnuernberg.sep.gruppe5.be.control.services;
 
 import de.thnuernberg.sep.gruppe5.be.control.mapper.AssessmentMailModelMapper;
 import de.thnuernberg.sep.gruppe5.be.control.mapper.AssessmentModelMapper;
-import de.thnuernberg.sep.gruppe5.be.control.models.AssessmentMailModel;
-import de.thnuernberg.sep.gruppe5.be.control.models.AssessmentModel;
+import de.thnuernberg.sep.gruppe5.be.control.models.Assessment;
+import de.thnuernberg.sep.gruppe5.be.control.models.AssessmentMail;
 import de.thnuernberg.sep.gruppe5.be.control.models.Course;
-import de.thnuernberg.sep.gruppe5.be.control.models.SemesterModel;
+import de.thnuernberg.sep.gruppe5.be.control.models.Semester;
 import de.thnuernberg.sep.gruppe5.be.entity.AssessmentEntity;
 import de.thnuernberg.sep.gruppe5.be.entity.Season;
 import de.thnuernberg.sep.gruppe5.be.entity.SemesterEntity;
@@ -36,7 +36,7 @@ public class AssessmentService {
   private final MailService mailService;
   private final AssessmentMailModelMapper assessmentMailModelMapper;
 
-  private static boolean isDeadlineValid(LocalDate deadline, @Valid SemesterModel semester) {
+  private static boolean isDeadlineValid(LocalDate deadline, @Valid Semester semester) {
     LocalDate lowerLimit = LocalDate.now().plusDays(6);
     LocalDate upperLimit;
     int year = semester.getYear();
@@ -45,7 +45,6 @@ public class AssessmentService {
     else
       upperLimit = LocalDate.of(year + 1, Month.MARCH, 15);
 
-
     return deadline.isAfter(lowerLimit) && deadline.isBefore(upperLimit);
   }
 
@@ -53,17 +52,21 @@ public class AssessmentService {
     return date.getMonthValue() * 100 + date.getDayOfMonth();
   }
 
-  private static boolean isSummerSeason(int currentMonthDay, int startMonthDay, int endMonthDay) {
+  private static boolean isSummerSeason(
+    int currentMonthDay,
+    int startMonthDay,
+    int endMonthDay
+  ) {
     return (currentMonthDay >= startMonthDay) && (currentMonthDay <= endMonthDay);
   }
 
-  public AssessmentModel addAssessment(@Valid AssessmentModel assessmentModel) {
+  public Assessment addAssessment(@Valid Assessment assessmentModel) {
     String course = assessmentModel.getCourse();
     String lecturer = assessmentModel.getLecturer();
     LocalDate deadline = assessmentModel.getDeadline();
 
     LocalDate currentDate = LocalDate.now();
-    SemesterModel semesterModel = new SemesterModel(identifyCurrentSeason(currentDate), currentDate.getYear());
+    Semester semesterModel = new Semester(identifyCurrentSeason(currentDate), currentDate.getYear());
     if (!isDeadlineValid(deadline, semesterModel))
       throw new AppException("Das Enddatum ist nicht valide", HttpStatus.BAD_REQUEST);
 
@@ -85,19 +88,20 @@ public class AssessmentService {
     return assessmentModelMapper.toAssessmentModel(savedAssessment);
   }
 
-  public List<AssessmentModel> getAllAssessments() {
+  public List<Assessment> getAllAssessments() {
     List<AssessmentEntity> assessments = assessmentRepository.findAll();
+
     return assessments.stream().map(assessmentModelMapper::toAssessmentModel).toList();
   }
 
-  public AssessmentModel getAssessmentById(Long assessmentId) {
+  public Assessment getAssessmentById(Long assessmentId) {
     AssessmentEntity assessment = assessmentRepository.findById(assessmentId)
       .orElseThrow(() -> new AppException("Diese Evaluation existiert nicht", HttpStatus.NOT_FOUND));
 
     return assessmentModelMapper.toAssessmentModel(assessment);
   }
 
-  public AssessmentModel updateAssessment(AssessmentModel assessment) {
+  public Assessment updateAssessment(Assessment assessment) {
     AssessmentEntity assessmentEntity = assessmentRepository.findById(assessment.getId())
       .orElseThrow(() -> new AppException("Diese Evaluation existiert nicht", HttpStatus.NOT_FOUND));
 
@@ -114,7 +118,7 @@ public class AssessmentService {
     return assessmentModelMapper.toAssessmentModel(assessmentRepository.save(assessmentEntity));
   }
 
-  public List<AssessmentModel> getCreatedAssessmentsFromLoggedInUser() {
+  public List<Assessment> getCreatedAssessmentsFromLoggedInUser() {
     UserEntity loggedInUser = this.userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName())
       .orElseThrow(() -> new AppException("Der angemeldete Benutzer konnte nicht gefunden werden", HttpStatus.INTERNAL_SERVER_ERROR));
 
@@ -124,12 +128,12 @@ public class AssessmentService {
   }
 
   public List<Course> getCourses() {
-    List<AssessmentModel> allAssessments = assessmentRepository.findAll().stream().map(assessmentModelMapper::toAssessmentModel).toList();
+    List<Assessment> allAssessments = assessmentRepository.findAll().stream().map(assessmentModelMapper::toAssessmentModel).toList();
 
     List<String> courseNames = new ArrayList<>();
     List<Course> courses = new ArrayList<>();
 
-    for (AssessmentModel assessment : allAssessments) {
+    for (Assessment assessment : allAssessments) {
       if (!courseNames.contains(assessment.getCourse())) {
         courseNames.add(assessment.getCourse());
         courses.add(new Course(assessment.getCourse()));
@@ -168,13 +172,13 @@ public class AssessmentService {
       for (Integer userId : userIdsByAssessmentId.get()) {
         Optional<String> usernameById = userRepository.getUsernameById(userId);
         if (usernameById.isPresent()) {
-          AssessmentMailModel assessmentMailModel = assessmentMailModelMapper.toAssessmentMailModel(assessment);
+          AssessmentMail assessmentMailModel = assessmentMailModelMapper.toAssessmentMailModel(assessment);
           mailService.sendAssessmentResultsReadyMail(assessmentMailModel, usernameById.get());
         }
       }
     }
 
-    AssessmentMailModel assessmentMailModel = assessmentMailModelMapper.toAssessmentMailModel(assessment);
+    AssessmentMail assessmentMailModel = assessmentMailModelMapper.toAssessmentMailModel(assessment);
     mailService.sendAssessmentResultsReadyMail(assessmentMailModel, assessment.getCreator());
   }
 
@@ -186,7 +190,11 @@ public class AssessmentService {
     int firstSummerMonthDay = getMonthDay(startDate);
     int lastSummerMonthDay = getMonthDay(endDate);
 
-    return isSummerSeason(currentMonthDay, firstSummerMonthDay, lastSummerMonthDay) ? Season.Sommer : Season.Winter;
+    return isSummerSeason(
+      currentMonthDay,
+      firstSummerMonthDay,
+      lastSummerMonthDay
+    ) ? Season.Sommer : Season.Winter;
   }
 
   public List<Long> getSubmittedAssessmentsFromLoggedInUser() {

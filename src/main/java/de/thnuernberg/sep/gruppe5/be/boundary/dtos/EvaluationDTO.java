@@ -8,15 +8,15 @@ import jakarta.validation.constraints.NotNull;
 public record EvaluationDTO(
   @NotNull Long assessmentId,
   @NotBlank String reviewCode,
-  @Min(1) @Max(5) int vorlesungsRating,
-  @Min(1) @Max(5) int uebungsRating,
-  @Min(1) @Max(5) int unterlagenRating,
-  @Min(1) @Max(5) int pruefungsRating,
-  @Min(0) @Max(5) int zeitaufwandRating,
-  @Min(0) @Max(5) int inhaltRating,
-  @Min(0) @Max(5) int stoffmengeRating,
-  @Min(0) @Max(5) int niveauRating,
-  @Min(0) @Max(5) int relevanzRating,
-  String bemerkung
+  @Min(1) @Max(5) int lectureRating,
+  @Min(1) @Max(5) int exerciseRating,
+  @Min(1) @Max(5) int papersRating,
+  @Min(1) @Max(5) int examRating,
+  @Min(0) @Max(5) int timeExpenditureRating,
+  @Min(0) @Max(5) int contentRating,
+  @Min(0) @Max(5) int scopeRating,
+  @Min(0) @Max(5) int difficultyRating,
+  @Min(0) @Max(5) int relevanceRating,
+  String remark
 ) {
 }

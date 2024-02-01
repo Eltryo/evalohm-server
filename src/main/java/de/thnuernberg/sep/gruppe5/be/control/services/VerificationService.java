@@ -40,14 +40,18 @@ public class VerificationService {
   public VerificationToken validateVerificationToken(String token) {
     VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
       .orElseThrow(() -> new AppException("Dieser Code ist leider ungültig!", HttpStatus.BAD_REQUEST));
+
     verificationTokenRepository.delete(verificationToken);
+
     return verificationToken;
   }
 
   public void resendVerificationToken(Credentials credentials) {
-    UserEntity user = userRepository.findByUsername(credentials.getUsername()).orElseThrow(() -> new AppException("User existiert nicht!", HttpStatus.NOT_FOUND));
+    UserEntity user = userRepository.findByUsername(credentials.getUsername())
+      .orElseThrow(() -> new AppException("User existiert nicht!", HttpStatus.NOT_FOUND));
 
-    VerificationToken token = verificationTokenRepository.findByUser(user).orElseThrow(() -> new AppException("Für diesen User liegt kein Bestätigungscode vor!", HttpStatus.NOT_FOUND));
+    VerificationToken token = verificationTokenRepository.findByUser(user)
+      .orElseThrow(() -> new AppException("Für diesen User liegt kein Bestätigungscode vor!", HttpStatus.NOT_FOUND));
 
     mailService.sendVerificationMail(user.getUsername(), token.getToken());
   }

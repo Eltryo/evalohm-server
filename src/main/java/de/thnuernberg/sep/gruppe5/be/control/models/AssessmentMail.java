@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class AssessmentMailModel {
+public class AssessmentMail {
   @NotBlank
   private String course;
+
   @NotBlank
   private String lecturer;
-  private SemesterModel semester;
+
+  private Semester semester;
 }

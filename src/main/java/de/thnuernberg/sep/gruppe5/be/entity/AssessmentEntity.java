@@ -57,7 +57,6 @@ public class AssessmentEntity {
     int length = 8;
     String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     StringBuilder code = new StringBuilder();
-
     for (int i = 0; i < length; i++) {
       int index = (int) (Math.random() * characters.length());
       code.append(characters.charAt(index));

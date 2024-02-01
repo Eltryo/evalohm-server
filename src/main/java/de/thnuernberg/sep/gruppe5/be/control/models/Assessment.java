@@ -10,18 +10,24 @@ import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
-public class AssessmentModel {
+public class Assessment {
   private Long id;
+
   @NotBlank
   private String course;
+
   @NotBlank
   private String lecturer;
+
   @DatePattern
   private LocalDate deadline;
+
   @DatePattern
   private LocalDate creationDate;
+
   @Valid
-  private SemesterModel semester;
+  private Semester semester;
+
   private boolean expired;
   private String creator;
   private String reviewCode;

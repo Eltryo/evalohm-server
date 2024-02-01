@@ -14,47 +14,36 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Evaluation {
+  @Min(1)
+  @Max(5)
+  int lectureRating;
+  @Min(1)
+  @Max(5)
+  int exerciseRating;
+  @Min(1)
+  @Max(5)
+  int papersRating;
+  @Min(1)
+  @Max(5)
+  int examRating;
+  @Min(0)
+  @Max(5)
+  int timeExpenditureRating;
+  @Min(0)
+  @Max(5)
+  int contentRating;
+  @Min(0)
+  @Max(5)
+  int scopeRating;
+  @Min(0)
+  @Max(5)
+  int difficultyRating;
+  @Min(0)
+  @Max(5)
+  int relevanceRating;
   @NotNull
   private Long assessmentId;
-
   @NotBlank
   private String reviewCode;
-
-  @Min(1)
-  @Max(5)
-  private int vorlesungsRating;
-
-  @Min(1)
-  @Max(5)
-  private int uebungsRating;
-
-  @Min(1)
-  @Max(5)
-  private int unterlagenRating;
-
-  @Min(1)
-  @Max(5)
-  private int pruefungsRating;
-
-  @Min(0)
-  @Max(5)
-  private int zeitaufwandRating;
-
-  @Min(0)
-  @Max(5)
-  private int inhaltRating;
-
-  @Min(0)
-  @Max(5)
-  private int stoffmengeRating;
-
-  @Min(0)
-  @Max(5)
-  private int niveauRating;
-
-  @Min(0)
-  @Max(5)
-  private int relevanzRating;
-
-  private String bemerkung;
+  private String remark;
 }

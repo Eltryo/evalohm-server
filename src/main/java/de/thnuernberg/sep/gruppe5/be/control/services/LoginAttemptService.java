@@ -32,6 +32,7 @@ public class LoginAttemptService {
     } catch (final ExecutionException e) {
       attempts = 0;
     }
+
     attempts++;
     attemptsCache.put(key, attempts);
 
@@ -55,6 +56,7 @@ public class LoginAttemptService {
     if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
       return request.getRemoteAddr();
     }
+
     return xfHeader.split(",")[0];
   }
 }

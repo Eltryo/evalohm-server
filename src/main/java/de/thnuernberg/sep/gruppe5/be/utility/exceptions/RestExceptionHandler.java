@@ -21,7 +21,6 @@ public class RestExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorResponseDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
     List<String> errorMessages = ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
-
     if (errorMessages.contains("TH-Mail")) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(new ErrorResponseDTO("Sie müssen eine TH-Email-Adresse verwenden."));
@@ -32,8 +31,7 @@ public class RestExceptionHandler {
         .body(new ErrorResponseDTO("Das angegebene Datenformat ist nicht korrekt"));
     }
 
-    //todo: muesste es nicht ein bad request zurueckgeben
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
       .body(new ErrorResponseDTO("Es scheint etwas schiefgelaufen zu sein."));
   }
 }

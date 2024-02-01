@@ -52,6 +52,7 @@ public class SpringSecurityAuthentication {
       .csrf(AbstractHttpConfigurer::disable)
       .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .oauth2ResourceServer(server -> server.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConfig.jwtAuthenticationConverter())));
+
     return http.build();
   }
 
@@ -65,6 +66,7 @@ public class SpringSecurityAuthentication {
     DaoAuthenticationProvider daoProvider = new DaoAuthenticationProvider();
     daoProvider.setUserDetailsService(detailsService);
     daoProvider.setPasswordEncoder(passwordEncoder());
+
     return new ProviderManager(daoProvider);
   }
 }

@@ -32,42 +32,36 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<MessageResponseDTO> register(@Valid @RequestBody CredentialsRequestDTO credentialsRequestDTO) {
     authenticationService.registerUser(credMapper.toCredentials(credentialsRequestDTO));
-    return ResponseEntity.created(URI.create("/confirmRegistration")).body(
-      new MessageResponseDTO("Du hast dich erfolgreich registriert. Wir haben dir eine Email geschickt, mit einem Bestätigungs-Code, den du hier eingeben musst, um deinen Account freizuschalten."));
+    return ResponseEntity.created(URI.create("/confirmRegistration")).body(new MessageResponseDTO("Du hast dich erfolgreich registriert. Wir haben dir eine Email geschickt, mit einem Bestätigungs-Code, den du hier eingeben musst, um deinen Account freizuschalten."));
   }
 
   @PostMapping("/confirmRegistration")
   public ResponseEntity<MessageResponseDTO> confirmRegistration(@Valid @RequestBody VerificationTokenRequestDTO token) {
     authenticationService.confirmRegistration(token.token());
-    return ResponseEntity.ok(
-      new MessageResponseDTO("Dein Account wurde erfolgreich eingerichtet."));
+    return ResponseEntity.ok(new MessageResponseDTO("Dein Account wurde erfolgreich eingerichtet."));
   }
 
   @PostMapping("/resendRegistrationCode")
   public ResponseEntity<MessageResponseDTO> resendRegistrationCode(@Valid @RequestBody CredentialsRequestDTO credentialsRequestDTO) {
     verificationService.resendVerificationToken(credMapper.toCredentials(credentialsRequestDTO));
-    return ResponseEntity.ok(
-      new MessageResponseDTO("Wir haben dir erneut eine Email geschickt, mit einem Bestätigungs-Code, den du hier eingeben musst, um deinen Account freizuschalten."));
+    return ResponseEntity.ok(new MessageResponseDTO("Wir haben dir erneut eine Email geschickt, mit einem Bestätigungs-Code, den du hier eingeben musst, um deinen Account freizuschalten."));
   }
 
   @PutMapping("/changePassword")
   public ResponseEntity<MessageResponseDTO> changePassword(@Valid @RequestBody PasswordsRequestDTO passwords) {
     this.authenticationService.changePassword(passwordsMapper.toPasswords(passwords));
-    return ResponseEntity.ok(
-      new MessageResponseDTO("Dein Passwort wurde geändert."));
+    return ResponseEntity.ok(new MessageResponseDTO("Dein Passwort wurde geändert."));
   }
 
   @PostMapping("/resetPassword")
   public ResponseEntity<MessageResponseDTO> resetPassword(@Valid @Pattern(regexp = "[A-Za-z0-9.]+@th-nuernberg\\.de", message = "TH-Mail") @RequestParam String email) {
     this.authenticationService.resetPassword(email);
-    return ResponseEntity.ok(
-      new MessageResponseDTO("Wir haben dir eine Email für die Zurücksetzung deines Passworts geschickt."));
+    return ResponseEntity.ok(new MessageResponseDTO("Wir haben dir eine Email für die Zurücksetzung deines Passworts geschickt."));
   }
 
   @PutMapping("/renewPassword")
   public ResponseEntity<MessageResponseDTO> renewPassword(@Valid @RequestBody PasswordsRequestDTO passwords) {
     this.authenticationService.renewPassword(passwordsMapper.toPasswords(passwords));
-    return ResponseEntity.ok(
-      new MessageResponseDTO("Dein Passwort wurde geändert."));
+    return ResponseEntity.ok(new MessageResponseDTO("Dein Passwort wurde geändert."));
   }
 }

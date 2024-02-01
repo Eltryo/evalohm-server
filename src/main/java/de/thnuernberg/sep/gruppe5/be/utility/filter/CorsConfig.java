@@ -41,8 +41,8 @@ public class CorsConfig {
     config.setMaxAge(MAX_AGE);
     source.registerCorsConfiguration("/**", config);
     FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-
     putCorsFilterBeforeSpringSecurityFilter(bean);
+
     return bean;
   }
 }

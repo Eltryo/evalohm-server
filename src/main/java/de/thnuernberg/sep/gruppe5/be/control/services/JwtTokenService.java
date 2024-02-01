@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,13 +43,11 @@ public class JwtTokenService {
 
   public void validateToken(String token) {
     Jwt jwt = jwtDecoder.decode(token);
-
     UserDetails user = userService.loadUserByUsername(jwt.getSubject());
-
     if (!user.getUsername().equals(SecurityContextHolder.getContext().getAuthentication().getName()))
       throw new AppException("Ungültige Authentifizierungsdaten!", HttpStatus.UNAUTHORIZED);
 
-    if (jwt.getExpiresAt().isBefore(Instant.now()))
+    if (Objects.requireNonNull(jwt.getExpiresAt()).isBefore(Instant.now()))
       throw new AppException("Authentifizierung ist abgelaufen!", HttpStatus.UNAUTHORIZED);
   }
 }

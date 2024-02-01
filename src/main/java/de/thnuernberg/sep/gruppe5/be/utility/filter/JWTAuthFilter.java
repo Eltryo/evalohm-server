@@ -26,7 +26,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
     if (header != null) {
       String[] authElements = header.split(" ");
-
       if (authElements.length == 2
         && "Bearer".equals(authElements[0])) {
         try {
@@ -50,7 +49,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getServletPath();
-
     String[] freePaths = {
       "/login",
       "/register",
@@ -59,7 +57,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
       "/resetPassword",
       "/renewPassword"
     };
-
     for (String freePath : freePaths) {
       if (path.startsWith(freePath)) return true;
     }

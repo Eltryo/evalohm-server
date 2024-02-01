@@ -27,15 +27,15 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
   @Override
   @Transactional
   public void onApplicationEvent(ContextRefreshedEvent event) {
-    if (alreadySetup)
-      return;
+    //if (alreadySetup)
+    //  return;
 
-    setupRoles();
-    setupUsers();
-    setupAssessments();
-    setupEvaluation();
+    //setupRoles();
+    //setupUsers();
+    //setupAssessments();
+    //setupEvaluation();
 
-    alreadySetup = true;
+    //alreadySetup = true;
   }
 
   private void setupEvaluation() {
@@ -48,16 +48,16 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
       EvaluationEntity evaluation = new EvaluationEntity();
       evaluation.setAssessmentId(1L);
-      evaluation.setVorlesungsRating(generateRandomScale());
-      evaluation.setUebungsRating(generateRandomScale());
-      evaluation.setUnterlagenRating(generateRandomScale());
-      evaluation.setPruefungsRating(generateRandomScale());
-      evaluation.setZeitaufwandRating(generateRandomScale());
-      evaluation.setInhaltRating(generateRandomScale());
-      evaluation.setStoffmengeRating(generateRandomScale());
-      evaluation.setNiveauRating(generateRandomScale());
-      evaluation.setRelevanzRating(generateRandomScale());
-      evaluation.setBemerkung(generateComment(i));
+      evaluation.setLectureRating(generateRandomScale());
+      evaluation.setExerciseRating(generateRandomScale());
+      evaluation.setPapersRating(generateRandomScale());
+      evaluation.setExamRating(generateRandomScale());
+      evaluation.setTimeExpenditureRating(generateRandomScale());
+      evaluation.setContentRating(generateRandomScale());
+      evaluation.setScopeRating(generateRandomScale());
+      evaluation.setDifficultyRating(generateRandomScale());
+      evaluation.setRelevanceRating(generateRandomScale());
+      evaluation.setRemark(generateComment(i));
       evaluationRepository.save(evaluation);
     }
   }
@@ -83,7 +83,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
   private void createRoleIfNotFound(String name) {
     Optional<RoleEntity> role = roleRepository.findByAuthority(name);
-
     if (role.isEmpty()) {
       RoleEntity result = new RoleEntity();
       result.setAuthority(name);
@@ -98,7 +97,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
   private void createUserIfNotFound(String mail, String password, String roleName) {
     Optional<UserEntity> userOptional = userRepository.findByUsername(mail);
-
     if (userOptional.isEmpty()) {
       RoleEntity role = roleRepository.findByAuthority(roleName).get();
       UserEntity user = new UserEntity();
@@ -134,7 +132,6 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     }
 
     Optional<AssessmentEntity> expiredAssessment = assessmentRepository.findById(2L);
-
     if (expiredAssessment.isEmpty()) {
       SemesterEntity semester = new SemesterEntity();
       semester.setSeason(Season.Sommer);

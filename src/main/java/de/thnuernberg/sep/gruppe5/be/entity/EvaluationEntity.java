@@ -18,50 +18,39 @@ import java.util.Objects;
 @AllArgsConstructor
 @Table(name = "evaluations")
 public class EvaluationEntity {
+  @Min(1)
+  @Max(5)
+  int lectureRating;
+  @Min(1)
+  @Max(5)
+  int exerciseRating;
+  @Min(1)
+  @Max(5)
+  int papersRating;
+  @Min(1)
+  @Max(5)
+  int examRating;
+  @Min(0)
+  @Max(5)
+  int timeExpenditureRating;
+  @Min(0)
+  @Max(5)
+  int contentRating;
+  @Min(0)
+  @Max(5)
+  int scopeRating;
+  @Min(0)
+  @Max(5)
+  int difficultyRating;
+  @Min(0)
+  @Max(5)
+  int relevanceRating;
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
-
   @NotNull
   private Long assessmentId;
-
-  @Min(1)
-  @Max(5)
-  private int vorlesungsRating;
-
-  @Min(1)
-  @Max(5)
-  private int uebungsRating;
-
-  @Min(1)
-  @Max(5)
-  private int unterlagenRating;
-
-  @Min(1)
-  @Max(5)
-  private int pruefungsRating;
-
-  @Min(0)
-  @Max(5)
-  private int zeitaufwandRating;
-
-  @Min(0)
-  @Max(5)
-  private int inhaltRating;
-
-  @Min(0)
-  @Max(5)
-  private int stoffmengeRating;
-
-  @Min(0)
-  @Max(5)
-  private int niveauRating;
-
-  @Min(0)
-  @Max(5)
-  private int relevanzRating;
-
-  private String bemerkung;
+  private String remark;
 
   @Override
   public final boolean equals(Object o) {
